@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>OPPOR17抽奖现场</title>
+
+	<link rel="stylesheet" href="css/index.css"/>
+
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/easing.js"></script>
+	<style>
+		body{
+			overflow: hidden;
+		}
+		.message{
+			position:absolute;
+			top: 15%;
+			left: 10%;
+			z-index: 9999;
+			font-size: 24px;
+			font-weight: bold;
+		}
+		.remove img{
+			width: 30px;
+			height: 30px;
+			
+		}
+		.remove{
+			position: absolute;
+			bottom: 0px;
+			right: 0px;
+		}
+	</style>
+</head>
+<body>
+	<div class="message">
+		<h1>中奖号码</h3>
+		<ul id="menu">
+
+		</ul>
+	</div>
+	<div class="remove">
+		<img src="images/clear.png" />
+	</div>
+	<!-- 主体盒子-->
+	<div class="main-box">
+	  <!-- 喜迎新年-->
+	  <div class="title-box" style="height: 200px;">
+		<img src="" alt=""/>
+	  </div>
+	  <!-- 装饰点缀-->
+	  <div class="desc-box">
+		  <img src="images/dianzhui.png" alt=""/>
+	  </div>		
+	  <div class="main">
+		  <!-- 数字背景盒子-->
+		  <div class="num-bg-box">
+			  <!-- 数字盒子-->
+			  <div class="num_box">
+				  <!--<div class="num"></div>
+				  <div class="num"></div>
+				  <div class="num"></div>
+				  <div class="num"></div>
+				  <div class="num"></div>
+				  <div class="num"></div>
+				  <div class="num"></div>-->
+				  <div class="num"></div>
+				  <div class="num"></div>
+				  <div class="num"></div>
+				  <div class="num"></div>
+			  </div>
+		  </div>
+	  </div>
+	</div>
+	<!-- 操作按钮-->
+	<div class="btn-box">
+		<div class="btn start">开始抽奖</div>
+		<div class="btn stop" >停止抽奖</div>
+	</div>
+	
+	<!--js-->
+	<script>
+	
+		var u = 100;
+		var n = 1;
+		var timer; //定义滚动的定时器
+		var result   = 0000; //指定中奖结果,可以抽取指定数组中的某一个
+		var isBegin  = false; //标识能否开始抽奖
+		if(localStorage.getItem("nums")==null){
+			localStorage.setItem('nums', JSON.stringify([]));
+		}else{
+			var numstr = localStorage.getItem('nums');
+			var nums = JSON.parse(numstr);
+			for (var i = 0;i<nums.length;i++) {
+				$('#menu').append("<li>"+nums[i]+"</li>");
+			}
+		}
+		
+		$(".num").css('backgroundPositionY',0);//开始13888888888
+		$(".num").eq(0).css('backgroundPositionY',0)
+		$(".num").eq(1).css('backgroundPositionY',0)
+	
+	function isInArray(arr,value){
+    for(var i = 0; i < arr.length; i++){
+        if(value === arr[i]){
+            return true;
+        }
+    }
+    return false;
+}
+	
+		function redomNum(){
+			result   = Math.ceil(Math.random()*100);
+			var num = "";
+			var j = (result+"").length;
+				//alert(j);
+			for (var i = 0;i<4-j;i++) {
+				num+="0";
+					//alert(num);
+			}
+			num+=result;
+			var numstr = localStorage.getItem('nums');
+			var nums = JSON.parse(numstr);
+			if(isInArray(nums,num)){
+				return redomNum();
+			}
+			return num;
+		}
+	
+		//执行数字滚动
+		function run(){
+			n++;
+			$(".num").each(function(index){
+				var _num = $(this);
+				_num.animate({
+					backgroundPositionY: ((u+1)*n*(index+1))
+				},100);
+	
+			});
+			timer = window.setTimeout(run,100);
+			isBegin = true ;
+		}
+		$(function(){
+			//开始抽奖
+			$('.start').click(function(){
+				result = redomNum();
+				//alert(num);
+				if(isBegin){
+					return false;
+				}else{
+					run();
+				}
+			});
+			//停止抽奖
+			$('.stop').click(function(){
+	
+				var num_arr = (result+'').split('');
+	
+				$(".num").each(function(index){
+					var _num = $(this);
+					setTimeout(function(){
+						_num.animate({
+							backgroundPositionY: (u*60) - (u*num_arr[index])
+						},{
+							duration: 500,
+							easing: "easeInOutCirc",
+							complete: function(){
+								if(index == 10){
+									isBegin = false;
+								}								
+							}
+						});
+						
+					},100);
+				});
+				window.clearTimeout(timer);
+				isBegin = false ;
+				$('#menu').append("<li>"+result+"</li>");
+				var numstr = localStorage.getItem('nums');
+				var nums = JSON.parse(numstr);
+				nums.push(result);
+				localStorage.setItem("nums",JSON.stringify(nums));
+			});
+			
+			$('.remove').click(function(){
+				show_confirm();
+			});
+		});
+		
+		
+		function show_confirm()
+		{
+		var r=confirm("是否删除中奖纪录!");
+		if (r==true)
+		  {
+		  	localStorage.removeItem("nums");
+		  	window.location.reload();
+		  }
+		else
+		  {
+		  
+		  }
+		}
+	</script>
+
+</body>
+</html>
